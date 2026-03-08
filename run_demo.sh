@@ -4,16 +4,29 @@ set -e
 # Export homebrew path in case it's not in the system PATH
 export PATH="/opt/homebrew/bin:$PATH"
 
+# Set DOCKER_HOST to use Colima
+export DOCKER_HOST="unix://${HOME}/.colima/default/docker.sock"
+
+# Check if Colima is running, start if not
+if ! colima status >/dev/null 2>&1; then
+    echo "Starting colima..."
+    colima start --cpu 2 --memory 4
+fi
+
 # ==========================================
 # 1. Wait for StarRocks Docker Container
 # ==========================================
 echo "[1/3] Initializing StarRocks Database Container..."
-# Clean up old container if exists
+# Clean up any existing container
 docker rm -f starrocks 2>/dev/null || true
-docker run -p 9030:9030 -p 8030:8030 -p 8040:8040 -d --name starrocks starrocks/allin1-ubuntu:3.2.14
+docker-compose down 2>/dev/null || true
+docker-compose up -d
 
-echo "Waiting bounds for StarRocks to be ready (~30 seconds)..."
-sleep 30
+echo "Waiting for StarRocks to be ready on port 9030..."
+while ! nc -z 127.0.0.1 9030; do
+    sleep 1
+done
+echo "StarRocks is ready!"
 
 # ==========================================
 # 2. Generate Mock S3 Parquet Data

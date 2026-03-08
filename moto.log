@@ -1,0 +1,16 @@
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+[33mPress CTRL+C to quit[0m
+127.0.0.1 - - [07/Mar/2026 15:26:28] "PUT /lakehouse-data-v2 HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 15:26:30] "[33mHEAD /$extremelyunlikelytoexist$ HTTP/1.1[0m" 404 -
+127.0.0.1 - - [07/Mar/2026 15:26:30] "HEAD /lakehouse-data-v2 HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 15:26:30] "PUT /lakehouse-data-v2/data/ HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 15:26:30] "POST /lakehouse-data-v2/data/f7559fadb967415b93220fd78347d6f3-0.parquet?uploads HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 15:26:30] "PUT /lakehouse-data-v2/data/f7559fadb967415b93220fd78347d6f3-0.parquet?partNumber=1&uploadId=MROldarrm0bYwEcAmvUXanIUNKQX3adADOQhOviNYCAOTzYoQd9uvg HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 15:26:30] "POST /lakehouse-data-v2/data/f7559fadb967415b93220fd78347d6f3-0.parquet?uploadId=MROldarrm0bYwEcAmvUXanIUNKQX3adADOQhOviNYCAOTzYoQd9uvg HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 15:26:33] "GET /lakehouse-data-v2?list-type=2&delimiter=/&max-keys=5000&prefix=data/ HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 15:26:33] "HEAD /lakehouse-data-v2/data/f7559fadb967415b93220fd78347d6f3-0.parquet HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 15:26:33] "[35m[1mGET /lakehouse-data-v2/data/f7559fadb967415b93220fd78347d6f3-0.parquet HTTP/1.1[0m" 206 -
+127.0.0.1 - - [07/Mar/2026 15:26:33] "HEAD /lakehouse-data-v2/data/f7559fadb967415b93220fd78347d6f3-0.parquet HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 15:26:33] "[35m[1mGET /lakehouse-data-v2/data/f7559fadb967415b93220fd78347d6f3-0.parquet HTTP/1.1[0m" 206 -
+127.0.0.1 - - [07/Mar/2026 15:26:33] "[35m[1mGET /lakehouse-data-v2/data/f7559fadb967415b93220fd78347d6f3-0.parquet HTTP/1.1[0m" 206 -
