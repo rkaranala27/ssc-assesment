@@ -54,34 +54,41 @@ def generate_sample_data(num_rows=1000):
     return df
 
 def upload_to_mock_s3(df):
-    """Write DataFrame to Moto S3 as partitioned Parquet using PyArrow."""
-    print("Writing PyArrow partitioned Parquet to Mock S3...")
+    """Write DataFrame to Moto S3 as Parquet using local files + boto3."""
+    print("Writing PyArrow Parquet to local temp directory, then uploading to Mock S3 via boto3...")
     
     table = pa.Table.from_pandas(df)
 
-    # Dump a copy locally for inspection
-    print("Saving local copy to mock_data.parquet...")
-    pq.write_table(table, "mock_data.parquet")
-    
-    # Configure pyarrow S3 file system pointing to the endpoint
-    s3_fs = pa.fs.S3FileSystem(
-        endpoint_override="127.0.0.1:5001",
-        scheme="http",
-        access_key="test",
-        secret_key="test",
-        allow_bucket_creation=True
-    )
-    
-    # Write partitioned dataset
+    # Write dataset to a local temporary directory
+    tmp_dir = "mock_s3_dataset"
+    if os.path.exists(tmp_dir):
+        import shutil
+        shutil.rmtree(tmp_dir)
+    os.makedirs(tmp_dir, exist_ok=True)
+
     pq.write_to_dataset(
         table,
-        root_path=f"{BUCKET_NAME}/data",
-        filesystem=s3_fs,
+        root_path=tmp_dir,
         use_dictionary=True,
-        compression="snappy"
+        compression="snappy",
     )
+
+    # Upload all generated parquet files to the Moto S3 bucket using boto3
+    print(f"Uploading Parquet files from '{tmp_dir}' to mock S3 bucket '{BUCKET_NAME}'...")
+    s3_client = boto3.client("s3", endpoint_url=S3_ENDPOINT_URL)
+
+    for root, _, files in os.walk(tmp_dir):
+        for filename in files:
+            if not filename.endswith(".parquet"):
+                continue
+            local_path = os.path.join(root, filename)
+            # Place all files under the 'data/' prefix in the bucket
+            relative_path = os.path.relpath(local_path, tmp_dir)
+            s3_key = os.path.join("data", relative_path)
+            print(f"Uploading {local_path} to s3://{BUCKET_NAME}/{s3_key} ...")
+            s3_client.upload_file(local_path, BUCKET_NAME, s3_key)
     
-    print("Data successfully generated and written to Mock S3.")
+    print("Data successfully generated and uploaded to Mock S3. Exiting generate_data.py now.")
 
 if __name__ == "__main__":
     init_mock_s3()
