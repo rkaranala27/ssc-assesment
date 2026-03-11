@@ -59,8 +59,28 @@ python generate_data.py
 # ==========================================
 echo "[3/3] Setting up StarRocks tables & MV and querying data..."
 
-# Run SQL Script natively using MySQL client
-mysql -h 127.0.0.1 -P 9030 -u root < setup_starrocks.sql
+# Give StarRocks a brief extra moment to fully initialize the MySQL service
+sleep 5
+
+# Run SQL Script natively using MySQL client with simple retry logic
+MAX_RETRIES=5
+RETRY_DELAY=3
+ATTEMPT=1
+
+while true; do
+    if mysql -h 127.0.0.1 -P 9030 -u root < setup_starrocks.sql; then
+        break
+    fi
+
+    if [ "$ATTEMPT" -ge "$MAX_RETRIES" ]; then
+        echo "Failed to connect to StarRocks via MySQL after ${MAX_RETRIES} attempts."
+        exit 1
+    fi
+
+    echo "MySQL connection failed, retrying in ${RETRY_DELAY}s... (attempt ${ATTEMPT}/${MAX_RETRIES})"
+    ATTEMPT=$((ATTEMPT + 1))
+    sleep "${RETRY_DELAY}"
+done
 
 echo "Refreshing Materialized View to build metrics..."
 mysql -h 127.0.0.1 -P 9030 -u root -D lakehouse -e "REFRESH MATERIALIZED VIEW client_daily_metrics WITH SYNC MODE;"
